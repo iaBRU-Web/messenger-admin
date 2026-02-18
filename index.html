@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brumessenger Admin</title>
+
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="adminAuth">
+  <div class="admin-login-card">
+    <div class="admin-brand">
+      <div class="admin-brand-icon">B</div>
+      <h2>Brumessenger Admin</h2>
+      <p>Restricted access — Admin only</p>
+    </div>
+    <div class="auth-err" id="adminAuthErr">Invalid credentials. Try again.</div>
+    <input class="inp" id="adminUser" type="text" placeholder="Admin username" autocomplete="off">
+    <input class="inp" id="adminPass" type="password" placeholder="Admin password" autocomplete="off">
+    <button class="btn-primary" onclick="doAdminLogin()">Login to Dashboard →</button>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="adminApp">
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <div class="admin-sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-b">B</div>
+        <div>
+          <span>Admin Panel</span>
+          <small>Brumessenger</small>
+        </div>
+      </div>
+
+      <nav>
+        <div class="nav-item active" onclick="showPage('dashboard')">
+          <span class="nav-icon">📊</span>
+          <span>Dashboard</span>
+        </div>
+        <div class="nav-item" onclick="showPage('users')">
+          <span class="nav-icon">👥</span>
+          <span>Users</span>
+        </div>
+        <div class="nav-item" onclick="showPage('reports')">
+          <span class="nav-icon">🚩</span>
+          <span>Reports</span>
+        </div>
+        <div class="nav-item" onclick="showPage('messages')">
+          <span class="nav-icon">💬</span>
+          <span>Messages</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="logout-btn" onclick="adminLogout()">
+          <span>🚪</span>
+          <span>Logout</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-main">
+
+      <!-- Dashboard -->
+      <div id="page-dashboard" class="page active">
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub">Overview of Brumessenger</div>
+
+        <div class="stats-grid" id="statsGrid">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#e8f0ff">👥</div>
+            <div class="stat-info">
+              <div class="stat-num" id="statUsers">—</div>
+              <div class="stat-label">Total Users</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#e8f8ee">🟢</div>
+            <div class="stat-info">
+              <div class="stat-num" id="statOnline">—</div>
+              <div class="stat-label">Online Now</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fff8e8">💬</div>
+            <div class="stat-info">
+              <div class="stat-num" id="statMessages">—</div>
+              <div class="stat-label">Total Messages</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fff0f0">🚩</div>
+            <div class="stat-info">
+              <div class="stat-num" id="statReports">—</div>
+              <div class="stat-label">Pending Reports</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users -->
+      <div id="page-users" class="page">
+        <div class="page-title">Users</div>
+        <div class="page-sub">All registered accounts — including passwords</div>
+
+        <div class="table-card">
+          <div class="table-head">
+            <h3>All Users</h3>
+            <button class="refresh-btn" onclick="loadAdminUsers()">🔄 Refresh</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Display Name</th>
+                  <th>Username</th>
+                  <th>Password</th>
+                  <th>Status</th>
+                  <th>Deletion?</th>
+                  <th>Joined</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray)">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reports -->
+      <div id="page-reports" class="page">
+        <div class="page-title">Reports</div>
+        <div class="page-sub">User reports and deletion requests</div>
+
+        <div class="table-card">
+          <div class="table-head">
+            <h3>All Reports</h3>
+            <button class="refresh-btn" onclick="loadAdminReports()">🔄 Refresh</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Reported By</th>
+                  <th>Target User</th>
+                  <th>Reason</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="reportsTableBody">
+                <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray)">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div id="page-messages" class="page">
+        <div class="page-title">Messages</div>
+        <div class="page-sub">All messages sent on the platform</div>
+
+        <div class="table-card">
+          <div class="table-head">
+            <h3>All Messages</h3>
+            <button class="refresh-btn" onclick="loadAdminMessages()">🔄 Refresh</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Message</th>
+                  <th>Sent At</th>
+                </tr>
+              </thead>
+              <tbody id="messagesTableBody">
+                <tr><td colspan="4" style="text-align:center;padding:30px;color:var(--gray)">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+  <style>
+    :root {
+      --blue: #0084ff;
+      --green: #42b72a;
+      --danger: #fa3e3e;
+      --warn: #ff9500;
+      --bg: #f0f2f5;
+      --sidebar-bg: #1a1d23;
+      --sidebar-text: #b0b8c8;
+      --sidebar-active: #0084ff;
+      --text: #050505;
+      --gray: #65676b;
+      --border: #e4e6eb;
+      --white: #fff;
+      --card-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+    body { background: var(--bg); min-height: 100vh; display: flex; }
+
+    /* ── AUTH ── */
+    #adminAuth {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--sidebar-bg);
+    }
+
+    .admin-login-card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px 36px;
+      width: 100%; max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .admin-brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .admin-brand-icon {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, var(--blue), #7b61ff);
+      border-radius: 18px;
+      margin: 0 auto 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; font-weight: 900; color: white;
+    }
+
+    .admin-brand h2 { font-size: 20px; color: var(--text); }
+    .admin-brand p { font-size: 13px; color: var(--gray); margin-top: 4px; }
+
+    .inp {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 15px;
+      outline: none;
+      margin-bottom: 12px;
+      background: var(--bg);
+      transition: border-color 0.2s;
+    }
+    .inp:focus { border-color: var(--blue); background: white; }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    .auth-err { color: var(--danger); font-size: 13px; margin-bottom: 10px; display: none; }
+
+    /* ── LAYOUT ── */
+    #adminApp { display: none; width: 100%; min-height: 100vh; }
+
+    .layout { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .admin-sidebar {
+      width: 230px;
+      background: var(--sidebar-bg);
+      padding: 24px 0;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0 20px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 16px;
+    }
+
+    .logo-b {
+      background: var(--blue);
+      color: white;
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 18px;
+    }
+
+    .sidebar-logo span { color: white; font-size: 15px; font-weight: 700; }
+    .sidebar-logo small { color: var(--sidebar-text); font-size: 11px; display: block; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 20px;
+      color: var(--sidebar-text);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
+    .nav-item.active { color: white; background: rgba(0,132,255,0.15); border-left-color: var(--blue); }
+    .nav-item .nav-icon { font-size: 18px; width: 22px; text-align: center; }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .logout-btn {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 0;
+    }
+
+    /* Main */
+    .admin-main {
+      margin-left: 230px;
+      flex: 1;
+      padding: 28px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .page-sub { font-size: 14px; color: var(--gray); margin-bottom: 24px; }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .stat-icon {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+
+    .stat-info .stat-num { font-size: 28px; font-weight: 800; color: var(--text); }
+    .stat-info .stat-label { font-size: 13px; color: var(--gray); }
+
+    /* Table */
+    .table-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .table-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .table-head h3 { font-size: 16px; font-weight: 700; color: var(--text); }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    th {
+      background: #f7f8fa;
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gray);
+      text-align: left;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 13px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafbfc; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-online { background: #e8f8ee; color: var(--green); }
+    .badge-offline { background: #f0f2f5; color: var(--gray); }
+    .badge-danger { background: #fff0f0; color: var(--danger); }
+    .badge-warn { background: #fff8e8; color: var(--warn); }
+    .badge-resolved { background: #e8f8ee; color: var(--green); }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-success {
+      background: var(--green);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-left: 6px;
+    }
+
+    .pw-toggle {
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--blue);
+      user-select: none;
+    }
+
+    /* Page visibility */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .empty-state {
+      padding: 40px;
+      text-align: center;
+      color: var(--gray);
+    }
+
+    .refresh-btn {
+      background: var(--bg);
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    @media (max-width: 768px) {
+      .admin-sidebar { width: 60px; }
+      .admin-sidebar .nav-item span, .admin-sidebar .sidebar-logo span,
+      .admin-sidebar .sidebar-logo small, .admin-sidebar .logout-btn span { display: none; }
+      .admin-main { margin-left: 60px; padding: 16px; }
+    }
+  </style>
+<script>
+  const API_BASE = 'https://YOUR-BACKEND.vercel.app/api';
+  let adminToken = localStorage.getItem('bru_admin_token');
+
+  if (adminToken) {
+    showAdminApp();
+  }
+
+  async function doAdminLogin() {
+    const username = document.getElementById('adminUser').value.trim();
+    const password = document.getElementById('adminPass').value;
+    try {
+      const r = await adminApi('/login', 'POST', { username, password }, true);
+      if (!r.user?.isAdmin) throw new Error('Not an admin account');
+      adminToken = r.token;
+      localStorage.setItem('bru_admin_token', adminToken);
+      showAdminApp();
+    } catch {
+      document.getElementById('adminAuthErr').style.display = 'block';
+    }
+  }
+
+  function showAdminApp() {
+    document.getElementById('adminAuth').style.display = 'none';
+    document.getElementById('adminApp').style.display = 'flex';
+    loadStats();
+    loadAdminUsers();
+    loadAdminReports();
+    loadAdminMessages();
+  }
+
+  function adminLogout() {
+    localStorage.removeItem('bru_admin_token');
+    adminToken = null;
+    location.reload();
+  }
+
+  function showPage(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    event.currentTarget.classList.add('active');
+
+    if (page === 'users') loadAdminUsers();
+    if (page === 'reports') loadAdminReports();
+    if (page === 'messages') loadAdminMessages();
+    if (page === 'dashboard') loadStats();
+  }
+
+  async function loadStats() {
+    try {
+      const s = await adminApi('/admin?action=stats', 'GET');
+      document.getElementById('statUsers').textContent = s.totalUsers;
+      document.getElementById('statOnline').textContent = s.onlineUsers;
+      document.getElementById('statMessages').textContent = s.totalMessages;
+      document.getElementById('statReports').textContent = s.pendingReports;
+    } catch {}
+  }
+
+  async function loadAdminUsers() {
+    const tbody = document.getElementById('usersTableBody');
+    try {
+      const users = await adminApi('/admin?action=users', 'GET');
+      if (!users.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No users yet</td></tr>';
+        return;
+      }
+      tbody.innerHTML = users.map(u => `
+        <tr>
+          <td><strong>${esc(u.displayName)}</strong></td>
+          <td><code>@${esc(u.username)}</code></td>
+          <td>
+            <span id="pw_${u.id}" style="filter:blur(4px);transition:0.2s;cursor:pointer" onclick="revealPw('${u.id}')">
+              ${esc(u.rawPassword || '••••••••')}
+            </span>
+            <span class="pw-toggle" onclick="revealPw('${u.id}')"> 👁</span>
+          </td>
+          <td><span class="badge ${u.online ? 'badge-online' : 'badge-offline'}">${u.online ? '🟢 Online' : '⚪ Offline'}</span></td>
+          <td>${u.deletionRequested ? `<span class="badge badge-danger">Requested</span>` : '—'}</td>
+          <td>${new Date(u.createdAt).toLocaleDateString()}</td>
+          <td><button class="btn-danger" onclick="deleteUser('${u.id}')">Delete</button></td>
+        </tr>
+      `).join('');
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="7" style="color:red;text-align:center;padding:20px">Error: ${e.message}</td></tr>`;
+    }
+  }
+
+  function revealPw(id) {
+    const el = document.getElementById('pw_' + id);
+    el.style.filter = el.style.filter ? '' : 'blur(4px)';
+  }
+
+  async function loadAdminReports() {
+    const tbody = document.getElementById('reportsTableBody');
+    try {
+      const reports = await adminApi('/admin?action=reports', 'GET');
+      if (!reports.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No reports yet</td></tr>';
+        return;
+      }
+      tbody.innerHTML = reports.map(r => `
+        <tr>
+          <td><span class="badge ${r.type === 'delete_account' ? 'badge-warn' : 'badge-danger'}">${r.type === 'delete_account' ? '🗑 Delete Request' : '🚩 Report'}</span></td>
+          <td>${esc(r.reportedByUsername)}</td>
+          <td>${esc(r.targetUsername)}</td>
+          <td style="max-width:200px;word-break:break-word">${esc(r.reason)}</td>
+          <td>${new Date(r.createdAt).toLocaleDateString()}</td>
+          <td><span class="badge ${r.resolved ? 'badge-resolved' : 'badge-danger'}">${r.resolved ? '✅ Resolved' : '⏳ Pending'}</span></td>
+          <td>
+            ${!r.resolved ? `
+              <button class="btn-danger" onclick="deleteUserFromReport('${r.targetId}', '${r.id}')">Delete User</button>
+              <button class="btn-success" onclick="resolveReport('${r.id}')">Dismiss</button>
+            ` : '—'}
+          </td>
+        </tr>
+      `).join('');
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="7" style="color:red;text-align:center;padding:20px">Error: ${e.message}</td></tr>`;
+    }
+  }
+
+  async function loadAdminMessages() {
+    const tbody = document.getElementById('messagesTableBody');
+    try {
+      const msgs = await adminApi('/admin?action=messages', 'GET');
+      if (!msgs.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No messages yet</td></tr>';
+        return;
+      }
+      // Show most recent first
+      const sorted = [...msgs].reverse();
+      tbody.innerHTML = sorted.map(m => `
+        <tr>
+          <td>${esc(m.fromDisplay || m.from)}</td>
+          <td><code>${esc(m.to)}</code></td>
+          <td style="max-width:300px;word-break:break-word">${esc(m.text)}</td>
+          <td>${new Date(m.sentAt).toLocaleString()}</td>
+        </tr>
+      `).join('');
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="4" style="color:red;text-align:center;padding:20px">Error: ${e.message}</td></tr>`;
+    }
+  }
+
+  async function deleteUser(userId) {
+    if (!confirm('Are you sure you want to permanently delete this user?')) return;
+    try {
+      await adminApi('/admin', 'DELETE', { userId });
+      alert('User deleted successfully.');
+      loadAdminUsers();
+      loadStats();
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
+  }
+
+  async function deleteUserFromReport(userId, reportId) {
+    if (!confirm('Delete this user and resolve the report?')) return;
+    try {
+      await adminApi('/admin', 'DELETE', { userId, reportId });
+      alert('User deleted and report resolved.');
+      loadAdminReports();
+      loadAdminUsers();
+      loadStats();
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
+  }
+
+  async function resolveReport(reportId) {
+    try {
+      await adminApi('/admin', 'POST', { reportId });
+      loadAdminReports();
+      loadStats();
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
+  }
+
+  async function adminApi(path, method = 'GET', body = null, noAuth = false) {
+    const opts = {
+      method,
+      headers: { 'Content-Type': 'application/json' }
+    };
+    if (!noAuth && adminToken) opts.headers['Authorization'] = `Bearer ${adminToken}`;
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(API_BASE + path, opts);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  document.getElementById('adminPass').addEventListener('keydown', e => { if (e.key === 'Enter') doAdminLogin(); });
+</script>
+</body>
+</html>
